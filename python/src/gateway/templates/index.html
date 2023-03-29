@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block head %}
+  <script type="text/javascript" src="./static/js/index.js"></script>
+{% endblock %}
+{% block title %}Playlister{% endblock %}
+{% block content %}
+    <h1>Playlister</h1>
+    <form autocomplete="off" id="loginForm" action="">
+      <h3>Login form</h3>
+      <div class="form-user"> 
+        <label for="user">Enter your username: </label>
+        <input type="text" name="name" id="name-login" required>
+      </div>
+      <div class="form-password">
+        <label for="password">Enter your password: </label>
+        <input type="password" name="password" id="password-login" required>        
+      </div>
+      <div class="form-send">
+        <button form="loginForm" name="submit" id="submit-button">Login!</button>
+      </div>
+    </form>
+    <p class="" id="message">
+      Welcome you.
+    </p>
+{% endblock %}

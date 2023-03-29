@@ -1,0 +1,31 @@
+python3 -m venv venv -> in directory to make virtual env
+source ./venv/bin/activate -> to activate virtual env
+deactivate -> to deactivate virtual env
+pip3 freeze > requirements.txt -> save requirements for app
+
+docker build . -> build docker image
+docker tag %tag user/repo:tag -> tag the docker image
+docker push user/repo:tag -> push docker image to docker.com
+docker pull user/repo:tag -> pull docker images from docker.com
+docker build -t %tag . -> build and tag docker image
+docker build -t %tag . --push -> build, tag and push docker image
+
+minikube start -> start instance of k8s in machine
+minikube addons list -> list available addons -> enable ingress addon
+minikube addons enable ingress -> enables the ingress addon on the minikube 
+				  instance. To route, run minukube tunnel 
+minikube tunnel -> routes requests to to the cluster 
+minikube dashboard -> allows visualization of current cluster via a dashboard
+
+
+kubectl apply -f ./ -> apply all manifests from current dir
+kubectl scale deployment --replicas=x name -> scales up or down to x the 
+						service name
+kubectl describe name -> shows a description of the service name
+kuebctl delete -f ./ -> delete all configurations from current dir
+kubectl get pod -> gets all active pods
+kubectl exec --stdin --tty %pod -- /bin/bash -> enter the shell for that pod
+
+-> in /etc/hosts change add to the loppback address the host name set in the 
+	ingress so it allows to resolve to it
+-> by default the login for rabbitmq is guest-guest
