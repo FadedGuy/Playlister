@@ -1,0 +1,24 @@
+<div id="loginForm">
+    <input type="text" placeholder="Username" [formControl]="username">
+    <div *ngIf="username.invalid && (username.dirty || username.touched)" class="alert">
+        <div *ngIf="username.errors?.['required']">
+            username is required.
+        </div>
+        <div *ngIf="username.errors?.['minlength']">
+            username must be at least 4 characters long.
+        </div>
+        <div *ngIf="username.errors?.['pattern']">
+            username must not contain invalid characters
+        </div>
+    </div>
+    <br>
+    <input type="password" placeholder="Password" [formControl]="password">
+    <div *ngIf="password.invalid && (password.dirty || password.touched)" class="alert">
+        <div *ngIf="password.errors?.['required']">
+            password is required.
+        </div>
+    </div>
+    <br>
+    <button type="button" (click)="login()">Login</button>
+
+</div>

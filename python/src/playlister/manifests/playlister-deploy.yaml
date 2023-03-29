@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: playlister
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: playlister
+  template:
+    metadata:
+      labels:
+        app: playlister
+    spec:
+      containers:
+        - name: playlister
+          image: fadedguy/playlister:latest
+          ports:
+            - containerPort: 4200
