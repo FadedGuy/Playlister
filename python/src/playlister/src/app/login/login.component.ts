@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { FormControl, NgModel } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { LoginService } from './login.service';
 
@@ -22,15 +23,29 @@ export class LoginComponent {
     Validators.required,
   ]);
 
-  constructor(private loginService: LoginService){}
+  messageLogin: string = "";
+  constructor(private loginService: LoginService, private router: Router){}
 
   login(){
     if(this.username.valid && this.password.valid){
-      console.log(this.username.value + " " + this.password.value);
       this.loginService
-        .postLogin(this.username.value, this.password.value)
-        .subscribe(res => console.log(res));
-    } else{
+        .login(this.username.value, this.password.value)
+        .subscribe({
+          next: () => {
+            this.messageLogin = "Logged In!";
+          },
+          error: (e) => {
+            console.error(e);
+            this.messageLogin = e;
+          },
+          complete: () => {
+            console.info("complete");
+            this.router.navigate(['app']);
+          }
+        })
+          
+    } 
+    else {
       console.error("Invalid");
     }
   }

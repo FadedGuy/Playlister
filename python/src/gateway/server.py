@@ -1,5 +1,5 @@
 import os, gridfs, pika, json, sys
-from flask import Flask, request, render_template, make_response, redirect, url_for
+from flask import Flask, request, render_template, make_response, redirect, url_for, jsonify
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 from auth import validate
@@ -9,7 +9,7 @@ from storage import util
 server = Flask(__name__)
 
 server.config["MONGO_URI"] = "mongodb://host.minikube.internal:27017/videos"
-CORS(server)
+CORS(server, supports_credentials=True)
 
 mongo = PyMongo(server)
 
@@ -25,11 +25,25 @@ def get_access_token(request):
 def login():
     token, err = access.login(request)
     if not err:
-        response = make_response(redirect('/app'))
-        response.set_cookie('access_token', token, httponly=True, samesite='Strict', secure=True)
-        return response
+        return jsonify({os.environ.get('ACCESS_TOKEN_ID'): token}), 200
+        # Soy consciente que esta no es la manera, pero, que esperan de mi llevo 3 dias y esto no funciona
+        # response = make_response()
+        # response.set_cookie(os.environ.get('ACCESS_TOKEN_ID'), token, httponly=False, secure=False, path='/')
+        # return response
     else:
         return err
+    
+@server.route("/validate", methods=["POST"])
+def validate():
+    access_token = get_access_token(request)
+    if not access_token:
+        return "not authorized", 401
+
+    token, err = validate.token(access_token)
+    if not err:
+        return "sucess!", 200   
+    else:
+        return "not authorized", 401
 
 @server.route("/upload", methods=["POST"])
 def upload():

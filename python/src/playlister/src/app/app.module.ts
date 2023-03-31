@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { HeaderComponent } from './header/header.component';
 import { IndexComponent } from './index/index.component';
+import { ApplicationComponent } from './application/application.component';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { IndexComponent } from './index/index.component';
     AppComponent,
     LoginComponent,
     HeaderComponent,
-    IndexComponent
+    IndexComponent,
+    ApplicationComponent
   ],
   imports: [
     BrowserModule,
