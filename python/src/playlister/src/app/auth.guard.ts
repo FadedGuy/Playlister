@@ -1,32 +1,43 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { Observable, tap, throwError } from 'rxjs';
+import { catchError, switchMap, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuard {
   constructor(private http: HttpClient, private router: Router){}
 
-  canActivate(): boolean{
-    // When set-cookie works, there is no need to send this as is, it would be sent automatically
+  canActivate(): any {
     const cookie = document.cookie.split(';').some((item) => item.trim().startsWith(`${environment.ACCESS_TOKEN_ID}`));
-    if(cookie){      
-        console.log(cookie);
-        return true;
-        // const url = `${environment.GATEWAY_SVC_ADDRESS}/verify`;
-        // this.http.post(url, "").pipe(
-        //   tap((response: any) => {
-        //     // route?
-        //     return true;
-        //   }),
-        // );
+    if (cookie) {
+      const url = `${environment.GATEWAY_SVC_ADDRESS}/validate`;
+      let cookieStr = '';
+      document.cookie.split(';').forEach((e) => {
+        if (e.startsWith(`${environment.ACCESS_TOKEN_ID}`)) {
+          cookieStr = e.split('=')[1];
+        }
+      });
+
+      const headers = new HttpHeaders().set('Authorization', cookieStr);
+      return this.http.post(url, '', { headers: headers, withCredentials: true, responseType: 'text' })
+        .pipe(
+          tap((response: any) => {
+            return response.status == 200;
+          }),
+          catchError((error: Error) => {
+            this.router.navigate([''])
+            return throwError(() => new Error(error.message));
+          })
+        )
+        .subscribe()
+    
       } 
 
-      this.router.navigate(['']); // Navigate to the login page if the cookie is not available
-      return false;
+    return false;
   }
 }

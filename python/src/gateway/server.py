@@ -1,10 +1,9 @@
 import os, gridfs, pika, json, sys
-from flask import Flask, request, render_template, make_response, redirect, url_for, jsonify
+from flask import Flask, request, make_response, jsonify
 from flask_pymongo import PyMongo
 from flask_cors import CORS
-from auth import validate
+from auth import verify
 from auth_svc import access
-from storage import util
 
 server = Flask(__name__)
 
@@ -35,19 +34,21 @@ def login():
     
 @server.route("/validate", methods=["POST"])
 def validate():
-    access_token = get_access_token(request)
+    # get_access_token instead of that when https
+    access_token = request.headers.get('Authorization')
     if not access_token:
         return "not authorized", 401
 
-    token, err = validate.token(access_token)
+    token, err = verify.token(access_token)
+    print(err, file=sys.stderr)
     if not err:
-        return "sucess!", 200   
+        return "success", 200   
     else:
         return "not authorized", 401
 
 @server.route("/upload", methods=["POST"])
 def upload():
-    access, err = validate.token(request)
+    access, err = verify.token(request)
 
     access = json.loads(access)
 
@@ -69,31 +70,6 @@ def upload():
 def download():
     pass
 
-
-@server.route("/", methods=["GET"])
-def index_page():
-    access_token = get_access_token(request)
-    if not access_token:
-        return render_template("index.html")
-    
-    token, err = validate.token(access_token)
-    if not err:
-        return redirect(url_for("app_page"))
-    else:
-        return render_template("index.html")
-
-
-@server.route("/app", methods=["GET"])
-def app_page():
-    access_token = get_access_token(request)
-    if access_token is None:
-        return redirect(url_for("index_page"))
-
-    token, err = validate.token(access_token)
-    if not err:
-        return render_template("app.html")
-    else:
-        return redirect(url_for("index_page"))
 
 if __name__ == "__main__":
     server.run(host="0.0.0.0", port=8080)
