@@ -15,7 +15,7 @@ mongo = PyMongo(server)
 fs = gridfs.GridFS(mongo.db)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
-channel = connection.channel()
+# channel = connection.channel()
 
 def get_access_token(request):
     return request.cookies.get(os.environ.get('ACCESS_TOKEN_ID'))
@@ -46,26 +46,25 @@ def validate():
     else:
         return "not authorized", 401
 
-@server.route("/upload", methods=["POST"])
-def upload():
-    access, err = verify.token(request)
 
-    access = json.loads(access)
+@server.route("/sendMessage", methods=["POST"])
+def sendMessage():
+    try:
+        connection.channel().basic_publish(
+            exchange="",
+            routing_key="msg",
+            body="Hi",
+            properties=pika.BasicProperties(
+                delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+            ),
+        )
 
-    if access["admin"]:
-        if len(request.files) != 1:
-            return "exactly 1 file required", 400
-        
-        for _, f in request.files.items():
-            print("ye")
-            # err = util.upload(f, fs, channel, access)
-            if err:
-                return err
-    
-        return "sucess!", 200
-    else:
-        return "not authorized", 401
-    
+        return "sucess", 200
+    except Exception as err:
+        print(err, file=sys.stderr)
+        return "internal server error", 500
+
+
 @server.route("/download", methods=["GET"])
 def download():
     pass
