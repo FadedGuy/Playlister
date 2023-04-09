@@ -1,6 +1,9 @@
 <div class="application">
-    <textarea autocomplete="off" maxlength="15" name="text" placeholder="Message" ></textarea>
+    <label>URL: </label> 
+    <input type="text" id="url" name="url" [(ngModel)]="urlText" autocomplete="false" autofocus="false">
     <br>
     <button type="button" (click)="send()">Send</button>
     <button type="button" (click)="receive()">Receive</button>
+    <br>
+    <div id="message">{{message}}</div>
 </div>

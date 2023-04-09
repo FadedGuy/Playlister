@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mysql
   labels:
     app: db
 spec:
-  replicas: 1
+  # replicas: 1
+  serviceName: mysql
   selector:
     matchLabels:
       app: db
@@ -17,7 +18,7 @@ spec:
       containers:
       - name: mysql
         image: mysql
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
               name: mysql-secret

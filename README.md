@@ -5,7 +5,7 @@ This is a microservices application that converts video files to audio files. It
 It uses Docker to create the containers and Kubernetes to orchestrate the whole thing.
 
 ## Notes
-Tested locally using minikube with two main caveats.
-* Used minikube tunnel to simulate sending request to mp3converter and rabbitmq by modifying /etc/hosts
+Tested locally using minikube.
 
+* Mysql, rabbitmq and mongodb deployment require to run a script for the initialization 
 

@@ -40,7 +40,7 @@ export class LoginComponent {
           },
           complete: () => {
             console.info("complete");
-            this.router.navigate(['app']);
+            this.router.navigateByUrl('app');
           }
         })
           

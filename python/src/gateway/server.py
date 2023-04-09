@@ -1,18 +1,21 @@
 import os, gridfs, pika, json, sys
 from flask import Flask, request, make_response, jsonify
-from flask_pymongo import PyMongo
+import pymongo
 from flask_cors import CORS
 from auth import verify
 from auth_svc import access
 
 server = Flask(__name__)
 
-server.config["MONGO_URI"] = "mongodb://host.minikube.internal:27017/videos"
+# server.config["MONGO_URI"] = "mongodb://mongo:27017/database"
+
 CORS(server, supports_credentials=True)
 
-mongo = PyMongo(server)
-
-fs = gridfs.GridFS(mongo.db)
+# mongo = PyMongo(server)
+uri = "mongodb://" + os.environ.get("MONGO_USER") + ":" + os.environ.get("MONGO_PASS") + "@" + os.environ.get("MONGO_SVC_ADDRESS") + "/database" 
+client = pymongo.MongoClient("mongodb://gatewayUser:gatewayPassword@mongo:27017/database")
+db = client["database"]
+# fs = gridfs.GridFS(mongo.db)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
 # channel = connection.channel()
@@ -40,34 +43,42 @@ def validate():
         return "not authorized", 401
 
     token, err = verify.token(access_token)
-    print(err, file=sys.stderr)
     if not err:
         return "success", 200   
     else:
         return "not authorized", 401
 
 
-@server.route("/sendMessage", methods=["POST"])
+@server.route("/sendURL", methods=["POST"])
 def sendMessage():
-    try:
-        connection.channel().basic_publish(
-            exchange="",
-            routing_key="msg",
-            body="Hi",
-            properties=pika.BasicProperties(
-                delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-            ),
-        )
+    access_token = request.headers.get('Authorization')
+    if not access_token:
+        return "not authorized", 401
+    
+    token, err = verify.token(access_token)
+    if not err:
+        try:
+            message = request.get_data(as_text=True)
 
-        return "sucess", 200
-    except Exception as err:
-        print(err, file=sys.stderr)
-        return "internal server error", 500
+            connection.channel().basic_publish(
+                exchange="",
+                routing_key="msg",
+                body=message,
+                properties=pika.BasicProperties(
+                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+                ),
+            )
 
+            return "sucess", 200
+        except Exception as err:
+            return "internal server error", 500
+    else:
+        return "not authorized", 401
 
 @server.route("/download", methods=["GET"])
 def download():
-    pass
+    print(db.list_collections(), file=sys.stderr)
+    return "sucess", 200
 
 
 if __name__ == "__main__":

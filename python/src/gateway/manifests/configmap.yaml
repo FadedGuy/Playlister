@@ -5,3 +5,5 @@ metadata:
 data:
   AUTH_SVC_ADDRESS: "auth:5000"
   ACCESS_TOKEN_ID: "access_token"
+  MONGO_USER: "gatewayUser"
+  MONGO_SVC_ADDRESS: "mongo:27017"

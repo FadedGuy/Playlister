@@ -12,7 +12,7 @@ import { environment } from 'src/environments/environment';
 export class AuthGuard {
   constructor(private http: HttpClient, private router: Router){}
 
-  canActivate(): any {
+  retrieveCookieMeanwhile() {
     const cookie = document.cookie.split(';').some((item) => item.trim().startsWith(`${environment.ACCESS_TOKEN_ID}`));
     if (cookie) {
       const url = `${environment.GATEWAY_SVC_ADDRESS}/validate`;
@@ -22,6 +22,15 @@ export class AuthGuard {
           cookieStr = e.split('=')[1];
         }
       });
+      return cookieStr;
+    }
+    return cookie;
+  }
+
+  canActivate(): any {
+    const cookieStr = this.retrieveCookieMeanwhile();
+    if (cookieStr) {
+      const url = `${environment.GATEWAY_SVC_ADDRESS}/validate`;
 
       const headers = new HttpHeaders().set('Authorization', cookieStr);
       return this.http.post(url, '', { headers: headers, withCredentials: true, responseType: 'text' })

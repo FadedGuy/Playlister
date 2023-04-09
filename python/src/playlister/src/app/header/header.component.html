@@ -1,1 +1,9 @@
-<header>Playlister</header>
+<header>
+    Playlister
+    <label *ngIf="username.length > 0">
+        Hello {{username}}
+    </label>
+
+    <button *ngIf="username.length > 0" (click)="logout()">Logout</button>
+</header>
+
