@@ -7,3 +7,6 @@ data:
   ACCESS_TOKEN_ID: "access_token"
   MONGO_USER: "gatewayUser"
   MONGO_SVC_ADDRESS: "mongo:27017"
+  MONGO_DB: "database"
+  MONGO_USER_HISTORY_COLLECTION: "userHistory"
+  MSG_QUEUE_IN: "msgIn"

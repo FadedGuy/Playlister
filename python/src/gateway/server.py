@@ -1,24 +1,21 @@
-import os, gridfs, pika, json, sys
+import os, pika, json, sys
 from flask import Flask, request, make_response, jsonify
 import pymongo
 from flask_cors import CORS
 from auth import verify
 from auth_svc import access
+from utils import util
 
 server = Flask(__name__)
 
-# server.config["MONGO_URI"] = "mongodb://mongo:27017/database"
-
 CORS(server, supports_credentials=True)
 
-# mongo = PyMongo(server)
-uri = "mongodb://" + os.environ.get("MONGO_USER") + ":" + os.environ.get("MONGO_PASS") + "@" + os.environ.get("MONGO_SVC_ADDRESS") + "/database" 
-client = pymongo.MongoClient("mongodb://gatewayUser:gatewayPassword@mongo:27017/database")
-db = client["database"]
-# fs = gridfs.GridFS(mongo.db)
+client = pymongo.MongoClient(util.get_mongo_uri())
+db = client[os.environ.get('MONGO_DB')]
+collection = db[os.environ.get('MONGO_USER_HISTORY_COLLECTION')]
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
-# channel = connection.channel()
+channel = connection.channel()
 
 def get_access_token(request):
     return request.cookies.get(os.environ.get('ACCESS_TOKEN_ID'))
@@ -50,7 +47,7 @@ def validate():
 
 
 @server.route("/sendURL", methods=["POST"])
-def sendMessage():
+def sendURL():
     access_token = request.headers.get('Authorization')
     if not access_token:
         return "not authorized", 401
@@ -58,27 +55,51 @@ def sendMessage():
     token, err = verify.token(access_token)
     if not err:
         try:
-            message = request.get_data(as_text=True)
+            youtubeURL = request.get_data(as_text=True)
+            message = util.add_url_db(collection, token, youtubeURL)
+            print("Added", file=sys.stderr)
 
-            connection.channel().basic_publish(
-                exchange="",
-                routing_key="msg",
-                body=message,
-                properties=pika.BasicProperties(
-                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-                ),
-            )
+            # If fail, delete doc added to db
+            util.send_url_queue(channel, os.environ.get("MSG_QUEUE_IN"), message)
+            print("Sent", file=sys.stderr)
 
             return "sucess", 200
         except Exception as err:
+            print(err, file=sys.stderr)
             return "internal server error", 500
     else:
         return "not authorized", 401
 
+
 @server.route("/download", methods=["GET"])
 def download():
-    print(db.list_collections(), file=sys.stderr)
-    return "sucess", 200
+    access_token = request.headers.get('Authorization')
+    if not access_token:
+        return "not authorized", 401
+    
+    token, err = verify.token(access_token)
+    if not err:
+        try:
+            cursor = util.get_docs_cursor(collection, token)
+        except Exception as err:
+            print(err, file=sys.stderr)
+            return "internal server error", 500
+
+        jsonResponse = []
+        for doc in cursor:
+            # Filter unwanted elements the client shouln't have like _id
+            jsonResponse.append({
+                'yt_url': doc['yt_url'],
+                'dateInit': doc['dateInit'],
+                'id': doc['id'],
+                'spotify_url': doc['spotify_url'],
+                })
+        
+        print(jsonResponse, file=sys.stderr)
+
+        return jsonResponse, 200
+    else:
+        return "not authorized", 401
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ import { ApplicationService } from './application.service';
 export class ApplicationComponent {
   message: string = "";
   urlText: string="";
+  cards = [];
   
   constructor(private appSvc: ApplicationService){}
   
@@ -36,6 +37,20 @@ export class ApplicationComponent {
   }
 
   receive(){
-    this.message = this.urlText + "1";
+    this.appSvc.retrieveURL().subscribe({
+      next: (c) => {
+        console.log(c);
+        this.cards= JSON.parse(c);
+        this.message = "nice";
+      },
+      error: (c) => {
+        console.error("bad");
+        this.message = "bad";
+      },
+      complete: () => {
+        console.log("finish");
+        this.message = "finish";
+      }
+    })
   }
 }

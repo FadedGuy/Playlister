@@ -20,7 +20,7 @@ def main():
 
 
     channel.basic_consume(
-        queue=os.environ.get("MSG_QUEUE"),
+        queue=os.environ.get("MSG_QUEUE_IN"),
         on_message_callback=callback
     )
 

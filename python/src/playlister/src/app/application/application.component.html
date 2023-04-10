@@ -6,4 +6,11 @@
     <button type="button" (click)="receive()">Receive</button>
     <br>
     <div id="message">{{message}}</div>
+
+    <div class="cards">
+        <div class="card" *ngFor="let card of cards">
+            <p>{{card['id']}}</p>
+            <p>{{card['yt_url']}}</p>
+        </div>
+    </div>
 </div>

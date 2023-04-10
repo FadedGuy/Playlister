@@ -34,4 +34,25 @@ export class ApplicationService {
     
         return of(false);
     }
+
+    retrieveURL(): Observable<any> {
+        const url = `${this.gatewayURL}/download`;
+        const cookieStr = this.auth.retrieveCookieMeanwhile();
+
+        if (cookieStr) {
+          const headers = new HttpHeaders().set('Authorization', cookieStr);
+          return this.http.get(url, { headers: headers, withCredentials: true, responseType: 'text' })
+            .pipe(
+              tap((response: any) => {
+                // console.log(response);
+                return response;
+              }),
+              catchError((error: Error) => {
+                return throwError(() => new Error(error.message));
+              })
+            )
+        } 
+    
+        return of(false);
+    }
 }

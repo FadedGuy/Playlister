@@ -6,7 +6,7 @@ db.createUser({
     user: "gatewayUser",
     pwd: "gatewayPassword",
     roles: [
-        {role: "readWrite", db: "mydb"},
+        {role: "readWrite", db: dbName},
     ]
 });
 
@@ -14,7 +14,7 @@ db.createUser({
     user: "converterUser",
     pwd: "converterPassword",
     roles: [
-        {role: "readWrite", db: "mydb"},
+        {role: "readWrite", db: dbName},
     ]
 });
 

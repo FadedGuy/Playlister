@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: converter-configmap
 data:
-  MSG_QUEUE: "msg"
+  MSG_QUEUE_IN: "msgIn"
