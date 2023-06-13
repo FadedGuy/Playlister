@@ -1,24 +1,30 @@
-<div id="loginForm">
-    <input type="text" placeholder="Username" [formControl]="username">
-    <div *ngIf="username.invalid && (username.dirty || username.touched)" class="alert">
-        <div *ngIf="username.errors?.['required']">
-            username is required.
-        </div>
-        <div *ngIf="username.errors?.['minlength']">
-            username must be at least 4 characters long.
-        </div>
-        <div *ngIf="username.errors?.['pattern']">
-            username must not contain invalid characters
-        </div>
-    </div>
-    <br>
-    <input type="password" placeholder="Password" [formControl]="password">
-    <div *ngIf="password.invalid && (password.dirty || password.touched)" class="alert">
-        <div *ngIf="password.errors?.['required']">
-            password is required.
+<div id="loginForm" class="loginForm">
+    <h2>Login</h2>
+    <div class="usernameContainer">
+        <input type="text" placeholder="Username" [formControl]="username">
+        <div *ngIf="username.invalid && (username.dirty || username.touched)" class="alert">
+            <div *ngIf="username.errors?.['required']">
+                username is required.
+            </div>
+            <div *ngIf="username.errors?.['minlength']">
+                username must be at least 4 characters long.
+            </div>
+            <div *ngIf="username.errors?.['pattern']">
+                username must not contain invalid characters
+            </div>
         </div>
     </div>
-    <br>
-    <button type="submit" (click)="login()">Login</button>
+    <div class="passwordContainer">
+        <input type="password" placeholder="Password" [formControl]="password">
+        <div *ngIf="password.invalid && (password.dirty || password.touched)" class="alert">
+            <div *ngIf="password.errors?.['required']">
+                password is required.
+            </div>
+        </div>
+    </div>
+    <div class="actionsContainer">
+        <button type="submit" (click)="login()" class="login">Sign In</button>
+        <button type="submit" class="signup">Sign Up</button>
+    </div>
     <div id="message">{{messageLogin}}</div>
 </div>
