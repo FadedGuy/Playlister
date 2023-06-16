@@ -4,3 +4,8 @@ metadata:
   name: converter-configmap
 data:
   MSG_QUEUE_IN: "msgIn"
+  MONGO_USER: "converterUser"
+  MONGO_SVC_ADDRESS: "mongo:27017"
+  MONGO_DB: "database"
+  MONGO_USER_HISTORY_COLLECTION: "userHistory"
+

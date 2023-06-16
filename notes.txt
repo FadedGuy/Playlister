@@ -29,3 +29,10 @@ kubectl exec --stdin --tty %pod -- /bin/bash -> enter the shell for that pod
 -> in /etc/hosts change add to the loppback address the host name set in the 
 	ingress so it allows to resolve to it
 -> by default the login for rabbitmq is guest-guest
+
+mongosh -u admin -p -> login to mongosh
+use database -> switch to database in mongosh
+db['collection'].find() -> list all values in a collection
+db.getCollectionNames().forEach(function (collectionName) { db[collectionName].drop(); }); -> erase all collections in a database
+
+

@@ -8,8 +8,12 @@
     <div id="message">{{message}}</div>
 
     <div class="cards">
-        <div class="card" *ngFor="let card of cards">
-            <p>{{card['id']}}</p>
+        <div class="card" *ngFor="let card of cards" [ngClass]="{'unprocessed-card': card['processed'] === 0, 
+                                                                'inprocess-card': card['processed'] === 1,
+                                                                'processed-card': card['processed'] === 2}">
+            <div>
+                Index: {{card['id']}} -- Success: {{card['success']}} -- ID {{card['video_id']}} -- List: {{card['mix_id']}} 
+            </div>
             <p>{{card['yt_url']}}</p>
         </div>
     </div>

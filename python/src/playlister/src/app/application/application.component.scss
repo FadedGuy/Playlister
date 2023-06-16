@@ -18,4 +18,17 @@ textarea{
     padding: 20px;
     margin: 5px;
     width: 250px;
+    border: 1px solid gray;
+}
+
+.processed-card{
+    background-color: green;
+}
+
+.unprocessed-card{
+    background-color: red;
+}
+
+.inprocess-card{
+    background-color: yellow;
 }

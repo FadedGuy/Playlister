@@ -14,8 +14,8 @@ client = pymongo.MongoClient(util.get_mongo_uri())
 db = client[os.environ.get('MONGO_DB')]
 collection = db[os.environ.get('MONGO_USER_HISTORY_COLLECTION')]
 
-connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
-channel = connection.channel()
+# connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq", heartbeat=600, blocked_connection_timeout=300))
+# channel = connection.channel()
 
 def get_access_token(request):
     return request.cookies.get(os.environ.get('ACCESS_TOKEN_ID'))
@@ -55,12 +55,14 @@ def sendURL():
     token, err = verify.token(access_token)
     if not err:
         try:
+            # Can make an additional check to see if url has already been given or processed
             youtubeURL = request.get_data(as_text=True)
             message = util.add_url_db(collection, token, youtubeURL)
             print("Added", file=sys.stderr)
 
+
             # If fail, delete doc added to db
-            util.send_url_queue(channel, os.environ.get("MSG_QUEUE_IN"), message)
+            util.send_url_queue(os.environ.get("MSG_QUEUE_IN"), message)
             print("Sent", file=sys.stderr)
 
             return "sucess", 200
@@ -93,10 +95,12 @@ def download():
                 'dateInit': doc['dateInit'],
                 'id': doc['id'],
                 'spotify_url': doc['spotify_url'],
+                'processed' : doc['processed'],
+                'success' : doc['success'],
+                'mix_id': doc['mix_id'],
+                'video_id' : doc['video_id'],
                 })
         
-        print(jsonResponse, file=sys.stderr)
-
         return jsonResponse, 200
     else:
         return "not authorized", 401

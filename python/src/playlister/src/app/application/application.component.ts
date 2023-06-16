@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApplicationService } from './application.service';
 
 
@@ -7,15 +7,19 @@ import { ApplicationService } from './application.service';
   templateUrl: './application.component.html',
   styleUrls: ['./application.component.scss']
 })
-export class ApplicationComponent {
+export class ApplicationComponent implements OnInit{
   message: string = "";
   urlText: string="";
   cards = [];
   
   constructor(private appSvc: ApplicationService){}
   
+  ngOnInit(): void {
+    this.receive();
+  }
+
   send(){
-    const expr = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
+    const expr = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=)|youtu\.be\/)([-_a-zA-Z0-9]{11})/;
     
     if(this.urlText.match(expr)){
       this.appSvc.sendURL(this.urlText).subscribe({
@@ -30,6 +34,7 @@ export class ApplicationComponent {
         complete: () => {
           console.log("finish");
           this.message = "finish";
+          this.receive();
         }
       })
     }

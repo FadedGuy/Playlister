@@ -23,13 +23,22 @@ def add_url_db(collection, token, url):
         'yt_url': url,
         'dateInit': str(datetime.datetime.utcnow()),
         'id': n_id,
-        'spotify_url': ""
+        'spotify_url': "",
+        # 0 not processed, 1 in process, 2 processed
+        'processed': 0,
+        'success': 0,
+        'mix_id': "",
+        'video_id': "",
+        'retries': 0
         })
 
     return json.dumps({"id": n_id, "collection_id": collection_id})
 
 
-def send_url_queue(channel, key, message):
+def send_url_queue(key, message):
+    connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq", heartbeat=600, blocked_connection_timeout=300))
+    channel = connection.channel()
+
     channel.basic_publish(
         exchange="",
         routing_key=key,
@@ -38,3 +47,5 @@ def send_url_queue(channel, key, message):
             delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
         ),
     )
+
+    channel.close()
