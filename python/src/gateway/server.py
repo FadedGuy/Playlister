@@ -92,13 +92,16 @@ def download():
             # Filter unwanted elements the client shouln't have like _id
             jsonResponse.append({
                 'yt_url': doc['yt_url'],
+                'yt_title': doc['yt_title'],
                 'dateInit': doc['dateInit'],
                 'id': doc['id'],
                 'spotify_url': doc['spotify_url'],
+                'spotify_preview': doc['spotify_preview'],
                 'processed' : doc['processed'],
                 'success' : doc['success'],
                 'mix_id': doc['mix_id'],
                 'video_id' : doc['video_id'],
+                'type': doc['type']
                 })
         
         return jsonResponse, 200

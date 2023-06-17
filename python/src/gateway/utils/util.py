@@ -21,14 +21,18 @@ def add_url_db(collection, token, url):
     # If already in collection same url dont add
     collection[collection_id].insert_one({
         'yt_url': url,
+        'yt_title': "",
         'dateInit': str(datetime.datetime.utcnow()),
         'id': n_id,
         'spotify_url': "",
+        'spotify_preview': "",
         # 0 not processed, 1 in process, 2 processed
         'processed': 0,
         'success': 0,
         'mix_id': "",
         'video_id': "",
+        # Type of video
+        'type': 4,
         'retries': 0
         })
 

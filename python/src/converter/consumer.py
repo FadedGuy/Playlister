@@ -32,14 +32,14 @@ def service(body):
         if list_id:
             res = collection[collection_id].update_one(
                 {"id": id},
-                {"$set": {"processed": 2, "success": 1, "mix_id": list_id, "video_id": video_id}}
+                {"$set": {"processed": 2, "success": 1, "mix_id": list_id, "video_id": video_id, "type":3}}
             )         
         else:
-            processed = util.process_yt_id(video_id)
-            if processed:
+            err, song_url, song_preview, yt_title = util.process_yt_id(video_id)
+            if err:
                 res = collection[collection_id].update_one(
                     {"id": id},
-                    {"$set": {"processed": 2, "success": 1, "video_id": video_id, "retries": doc['retries']+1}}
+                    {"$set": {"processed": 2, "success": 1, "video_id": video_id, "retries": doc['retries']+1, "spotify_url": song_url, "spotify_preview":song_preview, "type": 1, "yt_title": yt_title}}
                 ) 
             else: 
                 res = collection[collection_id].update_one(
