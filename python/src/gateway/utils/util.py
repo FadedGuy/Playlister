@@ -1,14 +1,9 @@
 import os, pika, json, datetime
 from base64 import b64encode
 
-def get_mongo_uri() -> str :
-    return f"mongodb://{os.environ.get('MONGO_USER')}:{os.environ.get('MONGO_PASS')}@{os.environ.get('MONGO_SVC_ADDRESS')}/{os.environ.get('MONGO_DB')}" 
-
-
 def get_collection_id(token) -> str:
     username = json.loads(token)['username'].encode()
     return b64encode(username).decode()
-
 
 def get_docs_cursor(collection, token, filter={}):
     collection_id = get_collection_id(token)

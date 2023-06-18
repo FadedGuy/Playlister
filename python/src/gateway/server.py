@@ -5,12 +5,12 @@ from flask_cors import CORS
 from auth import verify
 from auth_svc import access
 from utils import util
+from utilities.util import MongoDoc, get_mongo_uri
 
 server = Flask(__name__)
-
 CORS(server, supports_credentials=True)
 
-client = pymongo.MongoClient(util.get_mongo_uri())
+client = pymongo.MongoClient(get_mongo_uri())
 db = client[os.environ.get('MONGO_DB')]
 collection = db[os.environ.get('MONGO_USER_HISTORY_COLLECTION')]
 

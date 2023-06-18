@@ -25,15 +25,12 @@ export class ApplicationComponent implements OnInit{
       this.appSvc.sendURL(this.urlText).subscribe({
         next: () => {
           console.log("nice");
-          this.message = "nice";
         },
-        error: () => {
-          console.error("bad");
-          this.message = "bad";
+        error: (e) => {
+          console.error("Error: " + e);
         },
         complete: () => {
           console.log("finish");
-          this.message = "finish";
           this.receive();
         }
       })
@@ -46,15 +43,12 @@ export class ApplicationComponent implements OnInit{
       next: (c) => {
         console.log(c);
         this.cards= JSON.parse(c);
-        this.message = "nice";
       },
       error: (c) => {
         console.error("bad");
-        this.message = "bad";
       },
       complete: () => {
         console.log("finish");
-        this.message = "finish";
       }
     })
   }

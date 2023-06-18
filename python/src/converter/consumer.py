@@ -1,8 +1,9 @@
 import pika, sys, os, json
 import pymongo
 from utils import util
+from utilities.util import get_mongo_uri
 
-client = pymongo.MongoClient(util.get_mongo_uri())
+client = pymongo.MongoClient(get_mongo_uri())
 db = client[os.environ.get('MONGO_DB')]
 collection = db[os.environ.get('MONGO_USER_HISTORY_COLLECTION')]
 

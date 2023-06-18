@@ -9,10 +9,6 @@ yt_api_part = ["snippet", "contentDetails", "status", "topicDetails"]
 yt_video_url_api = "https://www.googleapis.com/youtube/v3/videos"
 spotify_token_url = "https://accounts.spotify.com/api/token"
 
-def get_mongo_uri() -> str :
-    return f"mongodb://{os.environ.get('MONGO_USER')}:{os.environ.get('MONGO_PASS')}@{os.environ.get('MONGO_SVC_ADDRESS')}/{os.environ.get('MONGO_DB')}" 
-
-
 def get_spotify_token():
     res = requests.post(spotify_token_url, 
                         headers={
