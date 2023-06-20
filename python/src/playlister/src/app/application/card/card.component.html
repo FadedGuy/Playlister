@@ -1,0 +1,9 @@
+<div [class.expanded]="expanded" (click)="toggleCard()" class="card">
+    <div *ngIf="!expanded" class="card-content">
+        {{card}}
+    </div>
+
+    <div *ngIf="expanded" class="card-content expanded">
+        "Im expanded"
+    </div>
+</div>

@@ -4,8 +4,8 @@ import pymongo
 from flask_cors import CORS
 from auth import verify
 from auth_svc import access
+from playlisterUtil.playlisterUtil import MongoDoc, get_mongo_uri
 from utils import util
-from utilities.util import MongoDoc, get_mongo_uri
 
 server = Flask(__name__)
 CORS(server, supports_credentials=True)
@@ -89,20 +89,9 @@ def download():
 
         jsonResponse = []
         for doc in cursor:
-            # Filter unwanted elements the client shouln't have like _id
-            jsonResponse.append({
-                'yt_url': doc['yt_url'],
-                'yt_title': doc['yt_title'],
-                'dateInit': doc['dateInit'],
-                'id': doc['id'],
-                'spotify_url': doc['spotify_url'],
-                'spotify_preview': doc['spotify_preview'],
-                'processed' : doc['processed'],
-                'success' : doc['success'],
-                'mix_id': doc['mix_id'],
-                'video_id' : doc['video_id'],
-                'type': doc['type']
-                })
+            # Filter doc and transform to MongoDoc obj
+            mongoDoc = MongoDoc.filter_mongo_doc(doc)
+            jsonResponse.append(mongoDoc.get_filtered_dict())            
         
         return jsonResponse, 200
     else:

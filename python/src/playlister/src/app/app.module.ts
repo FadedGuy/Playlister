@@ -9,6 +9,7 @@ import { LoginComponent } from './login/login.component';
 import { HeaderComponent } from './header/header.component';
 import { IndexComponent } from './index/index.component';
 import { ApplicationComponent } from './application/application.component';
+import { CardComponent } from './application/card/card.component';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { ApplicationComponent } from './application/application.component';
     LoginComponent,
     HeaderComponent,
     IndexComponent,
-    ApplicationComponent
+    ApplicationComponent,
+    CardComponent
   ],
   imports: [
     BrowserModule,

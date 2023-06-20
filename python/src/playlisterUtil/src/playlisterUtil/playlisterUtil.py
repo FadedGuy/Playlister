@@ -1,57 +1,59 @@
 import os
+import pymongo
 
 def get_mongo_uri() -> str :
     return f"mongodb://{os.environ.get('MONGO_USER')}:{os.environ.get('MONGO_PASS')}@{os.environ.get('MONGO_SVC_ADDRESS')}/{os.environ.get('MONGO_DB')}" 
 
 class MongoDoc:
-    def __init__(self):
-        self.data = {
-            'youtube': {
-                'url': '',
-                'title': '',
-                'video_id': '',
-                'mix_id': '',
-                'mix_index': '',
-                'duration': '',
-                'license': '',
-                'embeddable': False,
-                # Determined by duration > 30min and youtube tags
-                'is_multiple_songs': False, 
-                'is_mix': False,
-            },
-            'spotify': {
-                'api_href': '',
-                'song': {
-                    'name': '',
-                    'open_url': '',
-                    'preview_url': '',
-                    'api_url': '',
-                    'duration': 0,
+    def __init__(self, dictionary=None):
+        if type(dictionary) is dict:
+            self.data = dictionary
+        else:
+            self.data = {
+                'youtube': {
+                    'url': '',
+                    'title': '',
+                    'video_id': '',
+                    'mix_id': '',
+                    'mix_index': -1,
+                    'mix_name': '',
+                    'mix_num_songs': '',
+                    'channel_name': '',
+                    'duration': -1,
+                    'license': '',
+                    'embeddable': False,
+                    'is_multiple_songs': False,
+                    'mix_type': '',
                 },
-                'artist': {
-                    'open_url': '',
-                    'api_url': '',
-                    'name': '',
+                'spotify': {
+                    'song': {
+                        'name': '',
+                        'open_url': '',
+                        'preview_url': '',
+                        'api_url': '',
+                        'duration': -1,
+                    },
+                    'artist': {
+                        'open_url': '',
+                        'api_url': '',
+                        'name': '',
+                    },
+                    'album': {
+                        'name': '',
+                        'image_url': '',
+                        'open_url': '',
+                        'api_url': '',
+                        'duration': -1
+                    }
                 },
-                'album': {
-                    'name': '',
-                    'image_url': '',
-                    'open_url': '',
-                    'api_url': '',
-                    'duration': 0
-                }
-
-            },
-            'createdAt': "",
-            'startedProcessing': "",
-            'finishedProcessing': "",
-            'id': 0,
-            # 0 not processed, 1 in process, 2 processed
-            'processed': 0,
-            # 0 didn't succeed, 1 succeed
-            'success': 0,
-            'retries': 0
-        }
+                'createdAt': '',
+                'startedProcessing': '',
+                'finishedProcessing': '',
+                'id': -1,
+                'processed': 0,
+                'success': 0,
+                'retries': 0
+            }
 
     def get_value(self, key, default=None):
         keys = key.split('.')
@@ -82,6 +84,31 @@ class MongoDoc:
 
     def __delitem__(self, key):
         raise KeyError("Cannot delete key-value pairs")
+    
+    def insert_one_mongo(self, collection, collection_id):
+        collection[collection_id].insert_one(self.data)
+
+    def update_value_mongo(self, collection, collection_id, key, value):
+        try:
+            self.set_value(key, value)
+        except KeyError:
+            return False
+        
+        # Updating the whole document cannot be efficient right?
+        res = collection[collection_id].update_one(
+            {'id': self.data['id']},
+            {'$set': self.data}
+        )
+
+        return res
+
+    def update_values_mongo(self, collection, collection_id):
+        res = collection[collection_id].update_one(
+            {'id': self.data['id']},
+            {'$set': self.data}
+        )
+
+        return res
 
     def get_keys(self):
         def _recursive_keys(dictionary, parent_key=''):
@@ -98,7 +125,7 @@ class MongoDoc:
         return all_keys
 
     def get_filtered_dict(self):
-        keys_to_filter = ['youtube.license', 'spotify.api_href', 'spotify.song.api_url', 
+        keys_to_filter = ['youtube.license', 'spotify.song.api_url', 
                           'spotify.artist.api_url', 'spotify.album.api_url', 'createdAt',
                           'startedProcessing', 'finishedProcessing', 'retries']
         
@@ -116,3 +143,7 @@ class MongoDoc:
 
         stripped = _recursive_filter(self.data.copy())
         return stripped
+    
+    def filter_mongo_doc(dict):
+        dict.pop('_id')
+        return MongoDoc(dict)

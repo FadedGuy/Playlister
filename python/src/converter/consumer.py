@@ -1,7 +1,8 @@
 import pika, sys, os, json
 import pymongo
+import datetime
 from utils import util
-from utilities.util import get_mongo_uri
+from playlisterUtil.playlisterUtil import get_mongo_uri, MongoDoc
 
 client = pymongo.MongoClient(get_mongo_uri())
 db = client[os.environ.get('MONGO_DB')]
@@ -13,48 +14,40 @@ def service(body):
     collection_id = jsonBody['collection_id']
     id = jsonBody['id']
 
-    # Update status to being processed
-    res = collection[collection_id].update_one(
-        {"id": id},
-        {"$set": {"processed": 1}}
-    ) 
+    doc = collection[collection_id].find_one({"id": id})
+    # Error collection not found
+    if not doc:
+        print("No collection found!", file=sys.stderr)
 
-    # Get document with information
-    doc = collection[collection_id].find_one(
-            {"id": id}
-            )
-
-    valid, video_id, list_id, index = util.validate_yt_url(doc['yt_url'])
-    print(f"{valid}, {video_id}, {list_id}, {index}", file=sys.stderr)
-
-    if valid:
-        if doc['retries'] > 3:
-            return False
-        if list_id:
-            res = collection[collection_id].update_one(
-                {"id": id},
-                {"$set": {"processed": 2, "success": 1, "mix_id": list_id, "video_id": video_id, "type":3}}
-            )         
-        else:
-            err, song_url, song_preview, yt_title = util.process_yt_id(video_id)
-            if err:
-                res = collection[collection_id].update_one(
-                    {"id": id},
-                    {"$set": {"processed": 2, "success": 1, "video_id": video_id, "retries": doc['retries']+1, "spotify_url": song_url, "spotify_preview":song_preview, "type": 1, "yt_title": yt_title}}
-                ) 
-            else: 
-                res = collection[collection_id].update_one(
-                    {"id": id},
-                    {"$set": {"processed": 2, "video_id": video_id, "retries": doc['retries']+1}}
-                ) 
-    else:
-        res = collection[collection_id].update_one(
-            {"id": id},
-            {"$set": {"processed": 2}}
-        ) 
+    mongoDoc = MongoDoc.filter_mongo_doc(doc)
     
+    # Update status to being processed
+    mongoDoc.set_value('processed', 1)
+    mongoDoc.set_value('startedProcessing', str(datetime.datetime.utcnow()))
+    mongoDoc.set_value('retries', mongoDoc.get_value('retries')+1)
+    mongoDoc.update_values_mongo(collection, collection_id)
+
+    err = util.validate_yt_url(mongoDoc, collection, collection_id)
+    if err:
+        # Max retries: ack and leave it unprocessed
+        if mongoDoc.get_value('retries') > 3:
+            mongoDoc.set_value('processed', 2)
+            mongoDoc.set_value('finishedProcessing', str(datetime.datetime.utcnow()))
+            mongoDoc.update_values_mongo(collection, collection_id)
+            return True
+    
+    err = util.process_yt_id(mongoDoc)
+    if err:
+        print("Error in processing", file=sys.stderr)
+        mongoDoc.update_values_mongo(collection, collection_id)
+        return True
+    
+    mongoDoc.set_value('processed', 2)
+    mongoDoc.set_value('finishedProcessing', str(datetime.datetime.utcnow()))
+    mongoDoc.update_values_mongo(collection, collection_id)
     print("------------------------\n", file=sys.stderr)
 
+    return False
 
 def main():
     connection = pika.BlockingConnection(
@@ -88,3 +81,4 @@ if __name__ == "__main__":
             sys.exit()
         except SystemExit:
             os._exit(0)
+

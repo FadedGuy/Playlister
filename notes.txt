@@ -38,7 +38,8 @@ db.getCollectionNames().forEach(function (collectionName) { db[collectionName].d
 creating a python package:
 1. create a __init__.py, module.py and setup.py
 2. in the setup.py file add the necessary information and packages requireD
-3. Build the package using: python setup.py sdist
+3. Build the package using: python3 -m build
 4. Publish package using twine upload dist/* or manually
 python3 -m twine upload --repository testpypi dist/*
+python3 -m twine upload --repository pypi dist/*
 5. Add package to the projects that need that file

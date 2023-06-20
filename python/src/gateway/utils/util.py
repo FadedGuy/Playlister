@@ -1,5 +1,6 @@
-import os, pika, json, datetime
+import os, pika, json, datetime, sys
 from base64 import b64encode
+from playlisterUtil.playlisterUtil import MongoDoc
 
 def get_collection_id(token) -> str:
     username = json.loads(token)['username'].encode()
@@ -13,24 +14,14 @@ def get_docs_cursor(collection, token, filter={}):
 def add_url_db(collection, token, url):
     collection_id = get_collection_id(token)
     n_id = collection[collection_id].count_documents({})
-    # If already in collection same url dont add
-    collection[collection_id].insert_one({
-        'yt_url': url,
-        'yt_title': "",
-        'dateInit': str(datetime.datetime.utcnow()),
-        'id': n_id,
-        'spotify_url': "",
-        'spotify_preview': "",
-        # 0 not processed, 1 in process, 2 processed
-        'processed': 0,
-        'success': 0,
-        'mix_id': "",
-        'video_id': "",
-        # Type of video
-        'type': 4,
-        'retries': 0
-        })
 
+    doc = MongoDoc()
+    doc.set_value('youtube.url', url)
+    doc.set_value('createdAt', str(datetime.datetime.utcnow()))
+    doc.set_value('id', n_id)
+    doc.insert_one_mongo(collection, collection_id)
+    # If already in collection same url dont add
+    
     return json.dumps({"id": n_id, "collection_id": collection_id})
 
 
